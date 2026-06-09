@@ -1,0 +1,265 @@
+/* =========================================
+   1. VARIABLES Y PALETA DE COLORES (Monocromática Azul)
+   ========================================= */
+:root {
+  --c-darkest: #27374D;
+  --c-dark: #526D82;
+  --c-light: #9DB2BF;
+  --c-lightest: #DDE6ED;
+  
+  --bg-main: var(--c-lightest);
+  --bg-card: #ffffff;
+  
+  --text-primary: var(--c-darkest);
+  --text-secondary: var(--c-dark);
+  
+  --shadow-base: 0 4px 6px rgba(39, 55, 77, 0.1);
+  --shadow-hover: 0 10px 15px rgba(39, 55, 77, 0.15);
+  
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --transition-fluid: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================
+   2. RESET Y TIPOGRAFÍA
+   ========================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+/* =========================================
+   3. ANIMACIONES FLUIDAS
+   ========================================= */
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.slide-up { animation: slideUp 0.4s ease-out forwards; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   4. LAYOUT Y TITULOS
+   ========================================= */
+.app-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--c-light);
+}
+
+/* Rediseño del Título Principal */
+.app-main-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--c-darkest);
+  letter-spacing: -0.5px;
+  position: relative;
+  display: inline-block;
+}
+.app-main-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 40%;
+  height: 4px;
+  background-color: var(--c-dark);
+  border-radius: 2px;
+}
+
+/* =========================================
+   5. TARJETAS (CARDS) Y HOVER EFFECTS
+   ========================================= */
+.card-widget {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-base);
+  border: 1px solid transparent;
+  transition: var(--transition-fluid);
+  margin-bottom: 1.5rem;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--c-light);
+}
+
+/* Acordeón de Escenarios */
+.scenario-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+}
+.scenario-icon { font-size: 2rem; }
+.scenario-title { font-size: 1.25rem; font-weight: 600; color: var(--c-darkest); }
+
+.scenario-body {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out, margin-top 0.3s;
+}
+.scenario-body.expanded {
+  max-height: 300px; /* Suficiente espacio para expandir */
+  opacity: 1;
+  margin-top: 1rem;
+  border-top: 1px dashed var(--c-light);
+  padding-top: 1rem;
+}
+
+/* =========================================
+   6. BOTONES
+   ========================================= */
+.primary-btn {
+  background-color: var(--c-darkest);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fluid);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.primary-btn:hover:not(:disabled) {
+  background-color: var(--c-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* =========================================
+   7. CHAT Y BURBUJAS
+   ========================================= */
+.chat-container {
+  height: 500px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-right: 10px;
+}
+
+/* Burbujas sin pestaña, justificadas a la izquierda */
+.chat-bubble {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  text-align: left; /* Justificado a la izquierda */
+  box-shadow: 0 2px 5px rgba(39, 55, 77, 0.05);
+  border: 1px solid var(--c-lightest);
+}
+
+.bubble-user {
+  background-color: var(--bg-card);
+  border-bottom-right-radius: 4px;
+}
+.bubble-user strong { color: var(--c-darkest); }
+
+.bubble-ai {
+  background-color: var(--c-lightest);
+  border-bottom-left-radius: 4px;
+}
+.bubble-ai h3 { color: var(--c-dark); margin-bottom: 0.5rem; }
+
+/* =========================================
+   8. REPORTE FINAL (FinalReport.jsx)
+   ========================================= */
+.report-section { margin-bottom: 2rem; position: relative; }
+
+.section-title-wrapper { margin-bottom: 1rem; }
+.section-title-wrapper h2 {
+  font-size: 1rem;
+  color: var(--c-dark);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Layout Horizontal para Pros y Contras */
+.role-horizontal-card {
+  margin-bottom: 1.5rem;
+}
+.role-title {
+  color: var(--c-darkest);
+  border-bottom: 2px solid var(--c-light);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.pros-cons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 50/50 exacto */
+  gap: 1.5rem;
+  text-align: left;
+}
+
+/* Cajas de Pros (Detalles en color de la paleta) y Contras (Blancas) */
+.box-pro, .box-con {
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-light);
+}
+
+.box-pro {
+  background-color: rgba(157, 178, 191, 0.15); /* --c-light con opacidad */
+}
+.box-pro strong { color: var(--c-darkest); }
+
+.box-con {
+  background-color: #ffffff; /* Blanco puro */
+}
+.box-con strong { color: var(--c-dark); }
+
+ul.report-list { margin-top: 0.5rem; padding-left: 1.2rem; color: var(--text-secondary); }
+
+/* Layout 30/70 para Cierre */
+.split-30-70 { display: flex; gap: 1.5rem; }
+.box-30 {
+  flex: 0 0 30%;
+  background-color: var(--c-darkest);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+.box-70 {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+}
+
+/* Grid de 3 columnas para Resultados a 6 meses */
+.grid-3-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+
+@media (max-width: 768px) {
+  .pros-cons-grid { grid-template-columns: 1fr; }
+  .split-30-70 { flex-direction: column; }
+  .grid-3-cols { grid-template-columns: 1fr; }
+  .app-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+}
