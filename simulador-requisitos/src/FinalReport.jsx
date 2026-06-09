@@ -1,6 +1,6 @@
 import html2canvas from 'html2canvas';
 
-export default function FinalReport({ reportData, onReturn }) {
+export default function FinalReport({ reportData, onReturn, onGenerateERS, isLoading }) {
   const handleDownload = async () => {
     const element = document.getElementById('report-dashboard');
     const canvas = await html2canvas(element, { scale: 2 });
@@ -21,11 +21,22 @@ export default function FinalReport({ reportData, onReturn }) {
           <span style={{color: 'var(--c-dark)', fontWeight: 'bold'}}>Paso Final</span>
           <h1 className="app-main-title">Reporte de Simulación</h1>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="primary-btn" onClick={handleDownload}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {/* NUEVO BOTÓN PARA EL ERS */}
+          <button 
+            className="primary-btn" 
+            onClick={onGenerateERS} 
+            disabled={isLoading}
+            style={{ backgroundColor: 'var(--c-darkest)' }}
+          >
+            {isLoading ? '⚙️ Redactando ERS...' : '📄 Generar ERS (IEEE 830)'}
+          </button>
+
+          <button className="primary-btn" onClick={handleDownload} style={{ backgroundColor: 'var(--c-dark)' }}>
             📸 Guardar Captura
           </button>
-          <button className="primary-btn" onClick={onReturn} style={{ backgroundColor: 'var(--c-dark)' }}>
+          
+          <button className="primary-btn" onClick={onReturn} style={{ backgroundColor: 'var(--c-light)', color: 'var(--c-darkest)' }}>
             ✕ Menú
           </button>
         </div>

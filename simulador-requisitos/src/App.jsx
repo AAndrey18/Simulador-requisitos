@@ -38,6 +38,7 @@ export default function App() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [ersContent, setErsContent] = useState('');
 
   // Inicializa la sesión de chat inyectando el contexto del tema seleccionado
   const handleStartScenario = async (theme) => {
@@ -221,6 +222,63 @@ const handleEndSimulation = async () => {
     }
   };
 
+// NUEVA FUNCIÓN: Generar ERS en formato HTML
+  // =================================================================
+  const handleGenerateERS = async () => {
+    setIsLoading(true);
+
+    const systemInstruction = `
+      Actúas como un Analista de Requisitos de Software Senior.
+      Basado en el historial de esta simulación y en la decisión final tomada, redacta el documento de Especificación de Requisitos de Software (ERS) siguiendo estrictamente el estándar IEEE 830.
+
+      ESTRUCTURA OBLIGATORIA:
+      1. Introducción y alcance
+      2. Descripción general del producto
+      3. Requisitos Funcionales
+      4. Requisitos No Funcionales
+      5. Interfaces externas
+
+      REGLAS CRÍTICAS DE FORMATO:
+      - Devuelve el contenido ÚNICAMENTE en código HTML puro (usa <h2>, <h3>, <p>, <ul>, <li>, <strong>).
+      - NO incluyas las etiquetas <html>, <head> o <body>, solo el contenido a inyectar.
+      - NO uses Markdown en absoluto (prohibido usar # o **).
+      - NO envuelvas la respuesta en bloques de código de markdown (no escribas \`\`\`html al inicio).
+    `;
+
+    try {
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-3.1-flash-lite",
+        systemInstruction: systemInstruction 
+      });
+      
+      const history = [{ role: 'user', parts: [{ text: "Inicia la simulación." }] }];
+      let lastRole = 'user';
+      messages.forEach(msg => {
+        if ((msg.role === 'user' || msg.role === 'model') && msg.role !== lastRole) {
+          history.push({ role: msg.role, parts: [{ text: msg.text }] });
+          lastRole = msg.role;
+        }
+      });
+      if (history.length > 0 && history[history.length - 1].role === 'user') history.pop();
+
+      const chat = model.startChat({ history });
+      const result = await chat.sendMessage("Genera el ERS basado en la decisión final de esta simulación.");
+      
+      let responseText = result.response.text();
+      // Limpieza de seguridad por si Gemini ignora la regla de los bloques de código
+      responseText = responseText.replace(/```html\n?/g, '').replace(/```/g, '').trim();
+      
+      setErsContent(responseText);
+      setScreen('ers');
+
+    } catch (error) {
+      console.error("Error al generar el ERS:", error);
+      alert("Hubo un error al redactar el ERS. Inténtalo de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleReturnToMenu = () => {
     setScreen('selection');
     setSelectedTheme(null);
@@ -275,8 +333,69 @@ const handleEndSimulation = async () => {
 
   // --- RENDER DE PANTALLA 3: REPORTE FINAL ---
   if (screen === 'report') {
-    return <div className="fade-in"><FinalReport reportData={reportData} onReturn={handleReturnToMenu} /></div>;
+    return (
+      <div className="fade-in">
+        <FinalReport 
+          reportData={reportData} 
+          onReturn={handleReturnToMenu}
+          onGenerateERS={handleGenerateERS} // Pasamos la función
+          isLoading={isLoading}             // Pasamos el estado de carga
+        />
+      </div>
+    );
   }
+
+/* ========================================================
+     RENDER: PANTALLA 4 - DOCUMENTO ERS (NUEVA PANTALLA)
+     ======================================================== */
+  if (screen === 'ers') {
+    const handleDownloadWord = () => {
+      // Magia de exportación: Convertimos el HTML a un documento de Word (.doc) nativo
+      const content = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'><title>Documento ERS</title></head>
+        <body style="font-family: Arial, sans-serif; color: #27374D; line-height: 1.6;">
+          <h1 style="text-align: center; color: #27374D; border-bottom: 2px solid #526D82; padding-bottom: 10px;">Especificación de Requisitos de Software (IEEE 830)</h1>
+          ${ersContent}
+        </body>
+        </html>
+      `;
+      const blob = new Blob([content], { type: 'application/msword' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Documento_ERS_${selectedTheme?.id || 'Proyecto'}.doc`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    return (
+      <div className="app-container fade-in">
+        <header className="app-header">
+          <div>
+            <span style={{color: 'var(--c-dark)', fontWeight: 'bold'}}>Documentación Formal</span>
+            <h1 className="app-main-title">Documento ERS</h1>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="primary-btn" onClick={handleDownloadWord}>
+              ⬇️ Descargar Word (.doc)
+            </button>
+            <button className="primary-btn" onClick={() => setScreen('report')} style={{ backgroundColor: 'var(--c-dark)' }}>
+              🔙 Volver al Reporte
+            </button>
+          </div>
+        </header>
+        <main>
+          {/* Inyectamos el HTML de forma segura en la tarjeta */}
+          <div 
+            className="card-widget ers-content" 
+            dangerouslySetInnerHTML={{ __html: ersContent }} 
+          />
+        </main>
+      </div>
+    );
+  }
+
   /* ========================================================
      RENDER: PANTALLA 2 - ENTORNO DE CHAT INTERACTIVO (AGENTE)
      ======================================================== */
